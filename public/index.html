@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cat pic</title>
+  <meta name="CatPic" content="Cat pic generator">
+ <!--Manifest file--> 
+  <link rel="manifest" href="/manifest.json">
+<!-- CODELAB: Add iOS meta tags and icons -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<meta name="apple-mobile-web-app-title" content="CatPic">
+<link rel="apple-touch-icon" href="/images/icons/icon-152x152.png">
+  <!-- CODELAB: Add description here -->
+  <meta name="description" content="Sample cat pc">
+  <!-- CODELAB: Add meta theme-color -->
+  <meta name="theme-color" content="#2F3BA2" />
+
+  <style>
+    * {
+        margin: 0;
+        padding: 0;
+    }
+    #content {
+        
+    }
+    #header-container {
+        justify-content: center;
+    }
+    #header-container h1 {
+        
+        text-align: center;
+    }
+    #image-container {
+        display: flex;
+        justify-content: center;
+    }
+    #image-container img {
+        min-height: 500px;
+        min-width: 50%;
+
+    }
+    .left-right {
+        margin-left: 5px;
+        margin-right: 5px;
+    }
+</style>
+</head>
+<body>
+    <div id="content">
+        <h1>Cat Fact</h1>
+        <input type="text" id="number-input" class="left-right" placeholder="1-99 only"/>
+        <p id="text-here" class="left-right">text here</p>
+        <button class="button" class="left-right" id="refresh-button">Refresh</button>
+    </div>
+
+    <script>
+        function setInputFilter(textbox, inputFilter) {
+        ["input", "keydown", "keyup", "mousedown", "mouseup", "select", "contextmenu", "drop"].forEach(function(event) {
+            textbox.addEventListener(event, function() {
+            if (inputFilter(this.value)) {
+                this.oldValue = this.value;
+                this.oldSelectionStart = this.selectionStart;
+                this.oldSelectionEnd = this.selectionEnd;
+            } else if (this.hasOwnProperty("oldValue")) {
+                this.value = this.oldValue;
+                this.setSelectionRange(this.oldSelectionStart, this.oldSelectionEnd);
+            } else {
+                this.value = "";
+            }
+            });
+        });
+        }
+        setInputFilter(document.getElementById("number-input"), function(value) {
+        return /^\d*\.?\d*$/.test(value); // Allow digits and '.' only, using a RegExp
+        });
+
+
+        function getRandomArbitrary(min, max) {
+            return Math.random() * (max - min) + min;
+        }
+
+        function getRandomInt(min, max) {
+            min = Math.ceil(min);
+            max = Math.floor(max);
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        document.getElementById('refresh-button').addEventListener('click', () => {
+            let res = [];
+            document.getElementById('text-here').innerText = 'please wait...';
+            let total = 0;
+            let inputVal = document.getElementById('number-input').value;
+            let index = inputVal > 0 && inputVal < 100 && inputVal !== null? inputVal : 1;
+            
+            fetch(`/cat/${index}`)
+            .then(async (response) => {
+                const data = await response.json();
+                return data;
+            }).then(data => {
+                
+                console.log(`fact at index ${index}: ${data.text}`);
+                document.getElementById('text-here').innerText = data.text;
+            })
+            .catch(() => {
+                return null;
+            });
+        });
+    </script>
+    <script>
+        //register service worker
+        if('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('/sw.js')
+            .then((reg) => {
+                console.log("service Worker registered ", reg);
+            }).catch(err => {
+                console.error(err);
+            })
+        }
+    </script>
+</body>
+</html>
